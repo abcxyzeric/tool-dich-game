@@ -1,0 +1,20 @@
+{
+  "name": "rpgmaker-ai-translator",
+  "version": "1.0.0",
+  "description": "Công cụ dịch game RPGMaker và Ren'Py bằng AI thông qua Proxy tùy chỉnh (Phase 1)",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [
+    "rpgmaker",
+    "translation",
+    "ai",
+    "electron"
+  ],
+  "author": "Antigravity",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^30.0.0"
+  }
+}

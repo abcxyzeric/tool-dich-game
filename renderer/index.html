@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Game Translator Pro - Premium Edition</title>
+  <!-- Google Fonts & FontAwesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+
+  <!-- ROOT APP CONTAINER -->
+  <div class="app-container">
+
+    <!-- SIDEBAR NAVIGATION (COLLAPSIBLE) -->
+    <aside id="main-sidebar" class="main-sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">
+          <i class="fa-solid fa-language"></i>
+        </div>
+        <div class="brand-text">
+          <span class="title">AI Game</span>
+          <span class="subtitle">Translator Pro</span>
+        </div>
+        <button id="btn-toggle-sidebar" class="btn-toggle" title="Đóng/Mở Sidebar">
+          <i class="fa-solid fa-chevron-left toggle-icon"></i>
+        </button>
+      </div>
+
+      <ul class="nav-menu">
+        <li class="nav-item active" data-page="rpgmaker" title="Dịch RPGMaker">
+          <i class="fa-solid fa-gamepad nav-icon"></i>
+          <span class="nav-label">Dịch RPGMaker</span>
+        </li>
+        <li class="nav-item" data-page="renpy" title="Dịch Ren'Py">
+          <i class="fa-solid fa-book-open nav-icon"></i>
+          <span class="nav-label">Dịch Ren'Py</span>
+        </li>
+        <li class="nav-item" data-page="settings" title="Cài Đặt Hệ Thống">
+          <i class="fa-solid fa-sliders nav-icon"></i>
+          <span class="nav-label">Cài Đặt Hệ Thống</span>
+        </li>
+      </ul>
+
+      <div class="sidebar-footer">
+        <div class="status-indicator" title="Trạng thái Proxy">
+          <span id="proxy-online-dot" class="dot offline"></span>
+          <span id="proxy-status-label" class="nav-label">Proxy: Chưa kết nối</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="main-content">
+      
+      <!-- PAGE 1: DỊCH RPGMAKER -->
+      <section id="page-rpgmaker" class="page-section active">
+        <!-- WORKSPACE TABS HEADER -->
+        <header class="workspace-header">
+          <div id="tabs-list" class="tabs-container">
+            <!-- Dynamic workspace tabs inserted here -->
+          </div>
+          <button id="btn-new-workspace" class="btn-new-tab" title="Mở Workspace mới">
+            <i class="fa-solid fa-plus"></i> Workspace mới
+          </button>
+        </header>
+
+        <div class="workspace-body">
+          <!-- TOP TOOLBAR & SUB-NAV -->
+          <div class="workspace-toolbar">
+            <div class="sub-nav">
+              <button class="btn-subnav active" data-view="filelist"><i class="fa-solid fa-book"></i> Danh Sách File</button>
+              <button id="tab-translation-view" class="btn-subnav" data-view="translation" style="display: none;"><i class="fa-solid fa-pen-to-square"></i> Bảng Dịch Thuật</button>
+              <button class="btn-subnav" data-view="terminology"><i class="fa-solid fa-spell-check"></i> Thuật Ngữ & Xưng Hô</button>
+              <button class="btn-subnav" data-view="prompt"><i class="fa-solid fa-user-ninja"></i> Prompt & Yêu Cầu</button>
+            </div>
+            <div class="action-buttons">
+              <button id="btn-import-game" class="btn btn-primary"><i class="fa-solid fa-folder-open"></i> Import Game (F1)</button>
+              <button id="btn-ai-translate" class="btn btn-magic" style="display: none;"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Translate (F2)</button>
+              <button id="btn-stop-translate" class="btn btn-danger" style="display: none;"><i class="fa-solid fa-stop"></i> Dừng Dịch</button>
+              <button id="btn-export-file" class="btn btn-success"><i class="fa-solid fa-file-export"></i> Export / Lưu File (F3)</button>
+            </div>
+          </div>
+
+          <!-- SUB-VIEW 1: DANH SÁCH FILE -->
+          <div id="view-filelist" class="subview-panel active">
+            <div class="spacious-container">
+              <div class="table-toolbar">
+                <div class="search-box">
+                  <i class="fa-solid fa-magnifying-glass"></i>
+                  <input type="text" id="search-file-input" placeholder="Tìm kiếm tên file...">
+                </div>
+                <div class="filter-status" style="display: flex; gap: 10px; align-items: center;">
+                  <button id="btn-delete-selected" class="btn btn-danger btn-sm" style="display: none;"><i class="fa-solid fa-trash"></i> Xóa File</button>
+                  <span class="text-muted">Tích chọn các file bên dưới để xuất (Export) hoặc xóa.</span>
+                </div>
+              </div>
+
+              <div class="elegant-table-container">
+                <table class="elegant-table">
+                  <thead>
+                    <tr>
+                      <th class="col-checkbox" style="width: 40px; text-align: center;"><input type="checkbox" id="select-all-files" title="Chọn tất cả"></th>
+                      <th class="col-file-name">Tên File</th>
+                      <th class="col-event-count">Số Events (Gom nhóm)</th>
+                      <th class="col-status">Trạng Thái</th>
+                      <th class="col-actions">Hành Động</th>
+                    </tr>
+                  </thead>
+                  <tbody id="file-list-tbody">
+                    <tr>
+                      <td colspan="5" class="text-center empty-table">Chưa import game nào. Hãy nhấn Import Game (F1) để bắt đầu.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUB-VIEW 2: BẢNG DỊCH THUẬT -->
+          <div id="view-translation" class="subview-panel">
+            <div class="spacious-container full-height">
+              <div class="translation-header-bar">
+                <div class="current-file-info">
+                  <button id="btn-back-filelist" class="btn btn-icon"><i class="fa-solid fa-arrow-left"></i> Danh sách file</button>
+                  <h2 id="current-translating-file">Tên File: ...</h2>
+                </div>
+                <div class="translation-tip">
+                  <span class="text-muted"><i class="fa-solid fa-circle-info"></i> Toàn bộ câu thoại đã được gom cụm theo từng Event để AI dịch chính xác theo ngữ cảnh.</span>
+                </div>
+              </div>
+
+              <div class="elegant-table-container full-height">
+                <table class="elegant-table translation-grid">
+                  <thead>
+                    <tr>
+                      <th class="col-event-id">Event ID</th>
+                      <th class="col-original-text">Văn Bản Gốc (Original - Gom theo Event)</th>
+                      <th class="col-translated-text">Bản Dịch (Translated - Gom theo Event)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="translation-tbody">
+                    <tr>
+                      <td colspan="3" class="text-center empty-table">Hãy chọn một file từ Danh Sách File để bắt đầu dịch.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUB-VIEW 3: THUẬT NGỮ & XƯNG HÔ -->
+          <div id="view-terminology" class="subview-panel">
+            <div class="spacious-container">
+              <div class="elegant-card">
+                <div class="card-header">
+                  <h2><i class="fa-solid fa-spell-check"></i> Bảng Thuật Ngữ & Quy Tắc Xưng Hô (Có thể chỉnh sửa trực tiếp)</h2>
+                </div>
+                <div class="card-desc">
+                  AI tự động trích xuất các danh từ riêng và đề xuất quy tắc xưng hô phù hợp. Bạn có thể nhấn trực tiếp vào bất kỳ ô từ gốc hay xưng hô nào trong bảng bên dưới để chỉnh sửa nhanh. Mọi chỉnh sửa lập tức được cập nhật và tiêm liên tục vào tiến trình dịch của AI.
+                </div>
+                <div class="term-add-box">
+                  <input type="text" id="term-original" placeholder="Từ gốc (ví dụ: Claire, My Lord)...">
+                  <input type="text" id="term-replace" placeholder="Nghĩa dịch / Xưng hô (ví dụ: Claire (Cô/Em), Lãnh chúa (Ngài))...">
+                  <button id="btn-add-term" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Thêm</button>
+                </div>
+                <div class="elegant-table-container mt-4">
+                  <table class="elegant-table">
+                    <thead>
+                      <tr>
+                        <th>Từ Gốc (Original)</th>
+                        <th>Nghĩa Dịch / Xưng Hô (Replace)</th>
+                        <th class="col-actions">Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody id="term-tbody">
+                      <!-- Dynamic terms -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUB-VIEW 4: PROMPT & YÊU CẦU -->
+          <div id="view-prompt" class="subview-panel">
+            <div class="spacious-container">
+              <div class="grid-prompt">
+                <!-- PHẦN 1: PROMPT PERSONA -->
+                <div class="elegant-card">
+                  <div class="card-header">
+                    <h2><i class="fa-solid fa-user-ninja"></i> Prompt Persona (Hệ thống)</h2>
+                    <div>
+                      <button id="btn-reset-prompt" class="btn btn-secondary btn-sm"><i class="fa-solid fa-rotate-left"></i> Mặc định</button>
+                    </div>
+                  </div>
+                  <div class="card-desc">
+                    Prompt đóng vai Persona (mặc định là Hana thuộc tiệm dịch thuật "Phồn Hoa") giúp định hình phong cách dịch và vượt qua các rào cản kiểm duyệt.
+                  </div>
+                  <textarea id="prompt-textarea" class="prompt-box compact" rows="10"></textarea>
+                </div>
+
+                <!-- PHẦN 2: PROMPT YÊU CẦU CỦA USER -->
+                <div class="elegant-card">
+                  <div class="card-header">
+                    <h2><i class="fa-solid fa-comment-dots"></i> Prompt Yêu Cầu Của Bạn (<user>)</h2>
+                  </div>
+                  <div class="card-desc">
+                    Nhập các yêu cầu cụ thể của bạn khi dịch (ví dụ: <em>"Hãy dịch theo phong cách cổ trang kiếm hiệp, giữ nguyên tên riêng, xưng hô tại hạ - các hạ..."</em>).
+                  </div>
+                  <textarea id="user-prompt-textarea" class="prompt-box compact" rows="10" placeholder="Nhập yêu cầu dịch thuật cụ thể của bạn tại đây..."></textarea>
+                  <div class="form-actions mt-4 text-right">
+                    <button id="btn-save-prompt" class="btn btn-success"><i class="fa-solid fa-check"></i> Lưu Cấu Hình Prompt</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- PAGE 2: DỊCH REN'PY -->
+      <section id="page-renpy" class="page-section">
+        <!-- WORKSPACE TABS HEADER -->
+        <header class="workspace-header">
+          <div id="renpy-tabs-list" class="tabs-container">
+            <!-- Dynamic renpy workspace tabs inserted here -->
+          </div>
+          <button id="renpy-btn-new-workspace" class="btn-new-tab" title="Mở Workspace Ren'Py mới">
+            <i class="fa-solid fa-plus"></i> Workspace mới
+          </button>
+        </header>
+
+        <div class="workspace-body">
+          <!-- TOP TOOLBAR & SUB-NAV -->
+          <div class="workspace-toolbar">
+            <div class="sub-nav">
+              <button class="renpy-btn-subnav active" data-view="filelist"><i class="fa-solid fa-book"></i> Danh Sách File .rpy</button>
+              <button id="renpy-tab-translation-view" class="renpy-btn-subnav" data-view="translation" style="display: none;"><i class="fa-solid fa-pen-to-square"></i> Bảng Dịch Thuật</button>
+              <button class="renpy-btn-subnav" data-view="terminology"><i class="fa-solid fa-users-viewfinder"></i> Thuật Ngữ, Xưng Hô & Nhân Vật</button>
+              <button class="renpy-btn-subnav" data-view="prompt"><i class="fa-solid fa-user-ninja"></i> Prompt & Yêu Cầu</button>
+            </div>
+            <div class="action-buttons">
+              <button id="renpy-btn-import-file" class="btn btn-secondary"><i class="fa-solid fa-file-import"></i> Import 1 File</button>
+              <button id="renpy-btn-import-game" class="btn btn-primary"><i class="fa-solid fa-folder-open"></i> Import Thư Mục (F4)</button>
+              <button id="renpy-btn-ai-translate" class="btn btn-magic" style="display: none;"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Translate Ren'Py (F5)</button>
+              <button id="renpy-btn-stop-translate" class="btn btn-danger" style="display: none;"><i class="fa-solid fa-stop"></i> Dừng Dịch</button>
+              <button id="renpy-btn-export-file" class="btn btn-success"><i class="fa-solid fa-file-export"></i> Export / Lưu File (F6)</button>
+            </div>
+          </div>
+
+          <!-- REN'PY SUB-VIEW 1: DANH SÁCH FILE .RPY -->
+          <div id="renpy-view-filelist" class="renpy-subview-panel active">
+            <div class="spacious-container">
+              <div class="table-toolbar">
+                <div class="search-box">
+                  <i class="fa-solid fa-magnifying-glass"></i>
+                  <input type="text" id="renpy-search-file-input" placeholder="Tìm kiếm tên file .rpy...">
+                </div>
+                <div class="filter-status" style="display: flex; gap: 10px; align-items: center;">
+                  <button id="renpy-btn-delete-selected" class="btn btn-danger btn-sm" style="display: none;"><i class="fa-solid fa-trash"></i> Xóa File</button>
+                  <span class="text-muted">Tích chọn các file bên dưới để xuất (Export) hoặc xóa.</span>
+                </div>
+              </div>
+
+              <div class="elegant-table-container">
+                <table class="elegant-table">
+                  <thead>
+                    <tr>
+                      <th class="col-checkbox" style="width: 40px; text-align: center;"><input type="checkbox" id="renpy-select-all-files" title="Chọn tất cả"></th>
+                      <th class="col-file-name">Tên File / Đường Dẫn</th>
+                      <th class="col-event-count">Số Dòng Thoại (Line-by-line)</th>
+                      <th class="col-status">Trạng Thái</th>
+                      <th class="col-actions">Hành Động</th>
+                    </tr>
+                  </thead>
+                  <tbody id="renpy-file-list-tbody">
+                    <tr>
+                      <td colspan="5" class="text-center empty-table">Chưa import game Ren'Py nào. Hãy nhấn Import Ren'Py Game (F4) để bắt đầu.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- REN'PY SUB-VIEW 2: BẢNG DỊCH THUẬT (CÓ THANH ĐIỀU KHIỂN PHÂN TRANG & BATCH) -->
+          <div id="renpy-view-translation" class="renpy-subview-panel">
+            <div class="spacious-container full-height">
+              <div class="translation-header-bar">
+                <div class="current-file-info">
+                  <button id="renpy-btn-back-filelist" class="btn btn-icon"><i class="fa-solid fa-arrow-left"></i> Danh sách file .rpy</button>
+                  <h2 id="renpy-current-translating-file">Tên File: ...</h2>
+                </div>
+                <div class="translation-tip">
+                  <span class="text-muted"><i class="fa-solid fa-circle-info"></i> Lời thoại được tách riêng rẽ theo dòng (Line-by-line), tự động loại trừ code logic của Python/Ren'Py.</span>
+                </div>
+              </div>
+
+              <!-- THANH CÔNG CỤ PHÂN TRANG & QUẢN LÝ DỊCH BATCH -->
+              <div class="table-controls-bar">
+                <div class="pagination-controls">
+                  <label>Lọc:</label>
+                  <select id="renpy-filter-mode" style="margin-right: 15px; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-main);">
+                    <option value="all">Tất cả</option>
+                    <option value="untranslated">Chỉ chưa dịch</option>
+                    <option value="suspected_english">Chỉ Nghi ngờ Tiếng Anh</option>
+                  </select>
+                  <input type="text" id="renpy-search-translation" placeholder="Tìm kiếm text..." style="margin-right: 15px; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-main); width: 150px; font-size: 11px;">
+                  <label>Số dòng / Trang:</label>
+                  <input type="number" id="renpy-lines-per-page" value="100" min="10" max="5000" title="Nhập số dòng hiển thị trên mỗi trang (Mặc định 100)">
+                  <button id="renpy-btn-prev-page" class="btn btn-sm btn-secondary" title="Trang trước"><i class="fa-solid fa-chevron-left"></i></button>
+                  <span class="page-info-text">Trang:</span>
+                  <input type="number" id="renpy-current-page-input" value="1" min="1" title="Nhập số trang muốn tới và nhấn Enter">
+                  <span id="renpy-total-pages-info" class="page-info-text">/ 1</span>
+                  <button id="renpy-btn-next-page" class="btn btn-sm btn-secondary" title="Trang sau"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+                <div class="batch-controls">
+                  <label title="Gộp số dòng thoại vào 1 batch để gửi cho AI dịch nhanh và hiểu ngữ cảnh">Cỡ Batch (Lines/Batch):</label>
+                  <input type="number" id="renpy-batch-size" value="50" min="5" max="500" title="Nhập số dòng gộp trong 1 batch (Mặc định 50)">
+                  <label title="Dừng lại sau khi dịch xong số batch nhất định (0 = Dịch toàn bộ)">Dừng sau N Batch:</label>
+                  <input type="number" id="renpy-max-batches" value="0" min="0" max="1000" title="Số batch tối đa sẽ dịch (0 = Không giới hạn, dịch hết file)">
+                  <span class="text-muted"><i class="fa-solid fa-bolt"></i> Dịch gộp Batch tối ưu tốc độ & chống lag</span>
+                </div>
+              </div>
+
+              <div class="elegant-table-container full-height">
+                <table class="elegant-table translation-grid">
+                  <thead>
+                    <tr>
+                      <th class="col-checkbox" style="width: 40px; text-align: center;"><input type="checkbox" id="renpy-trans-select-all" title="Chọn tất cả trên trang này"></th>
+                      <th class="col-event-id">Line ID / Speaker</th>
+                      <th class="col-original-text">Văn Bản Gốc (Original Text)</th>
+                      <th class="col-translated-text">Bản Dịch (Translated Text)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="renpy-translation-tbody">
+                    <tr>
+                      <td colspan="4" class="text-center empty-table">Hãy chọn một file từ Danh Sách File để bắt đầu dịch.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- REN'PY SUB-VIEW 3: THUẬT NGỮ, XƯNG HÔ & THÔNG TIN NHÂN VẬT -->
+          <div id="renpy-view-terminology" class="renpy-subview-panel">
+            <div class="spacious-container">
+              <div class="split-cards-container">
+                
+                <!-- KHỐI 1: THUẬT NGỮ & XƯNG HÔ -->
+                <div class="elegant-card flex-1">
+                  <div class="card-header">
+                    <h2><i class="fa-solid fa-spell-check"></i> Thuật Ngữ Đặc Biệt (Sửa trực tiếp)</h2>
+                    <input type="text" id="renpy-search-term" placeholder="Tìm kiếm thuật ngữ..." style="padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-input); color: var(--text-main); width: 180px; font-size: 12px; margin-left: auto;">
+                  </div>
+                  <div class="card-desc">
+                    AI tự động trích xuất các danh từ riêng, thuật ngữ đặc thù. Bạn có thể bấm thẳng vào các ô trong bảng để sửa đổi. Nội dung chỉnh sửa sẽ lập tức được tự động tiêm liên tục vào bối cảnh trước mỗi Batch dịch.
+                  </div>
+                  <div class="term-add-box">
+                    <input type="text" id="renpy-term-original" placeholder="Từ gốc (ví dụ: Jennifer)...">
+                    <input type="text" id="renpy-term-replace" placeholder="Nghĩa dịch / Xưng hô (ví dụ: Jennifer (Cô/Em))...">
+                    <button id="renpy-btn-add-term" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Thêm</button>
+                  </div>
+                  <div class="elegant-table-container mt-4">
+                    <table class="elegant-table">
+                      <thead>
+                        <tr>
+                          <th>Từ Gốc (Original)</th>
+                          <th>Nghĩa Dịch / Xưng Hô (Replace)</th>
+                          <th class="col-actions">Thao tác</th>
+                        </tr>
+                      </thead>
+                      <tbody id="renpy-term-tbody">
+                        <!-- Dynamic renpy terms -->
+                      </tbody>
+                    </table>
+                    <div id="renpy-term-pagination" class="pagination-controls" style="padding: 15px 10px; justify-content: center; gap: 15px; border-top: 1px solid var(--border);"></div>
+                  </div>
+                </div>
+
+                <!-- KHỐI 2: THÔNG TIN & MỐI QUAN HỆ NHÂN VẬT -->
+                <div class="elegant-card flex-1 mt-4">
+                  <div class="card-header">
+                    <h2><i class="fa-solid fa-user-group"></i> Tóm Tắt Thông Trang Nhân Vật & Mối Quan Hệ (Sửa trực tiếp)</h2>
+                    <input type="text" id="renpy-search-char" placeholder="Tìm kiếm nhân vật..." style="padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-input); color: var(--text-main); width: 180px; font-size: 12px; margin-left: auto;">
+                  </div>
+                  <div class="card-desc">
+                    AI tự động phân tích kịch bản game. Cột bên trái hiển thị tên thuần túy của nhân vật, toàn bộ thông tin vai trò, tính cách và mối quan hệ được dồn gọn gàng vào cột bên phải. Bạn có thể gõ để sửa trực tiếp.
+                  </div>
+                  <div class="term-add-box">
+                    <input type="text" id="renpy-char-name" placeholder="Tên nhân vật (ví dụ: Jennifer)...">
+                    <input type="text" id="renpy-char-info" placeholder="Thông tin & mối quan hệ (ví dụ: Nữ chính, quan hệ phức tạp với quản lý)...">
+                    <button id="renpy-btn-add-char" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Thêm</button>
+                  </div>
+                  <div class="elegant-table-container mt-4">
+                    <table class="elegant-table">
+                      <thead>
+                        <tr>
+                          <th>Nhân Vật</th>
+                          <th>Thông Tin Tóm Tắt & Mối Quan Hệ (Giới tính, tính cách, vai trò...)</th>
+                          <th class="col-actions">Thao tác</th>
+                        </tr>
+                      </thead>
+                      <tbody id="renpy-char-tbody">
+                        <!-- Dynamic renpy characters info -->
+                      </tbody>
+                    </table>
+                    <div id="renpy-char-pagination" class="pagination-controls" style="padding: 15px 10px; justify-content: center; gap: 15px; border-top: 1px solid var(--border);"></div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- REN'PY SUB-VIEW 4: PROMPT & YÊU CẦU (ĐỘC LẬP) -->
+          <div id="renpy-view-prompt" class="renpy-subview-panel">
+            <div class="spacious-container">
+              <div class="grid-prompt">
+                <!-- PHẦN 1: PROMPT PERSONA -->
+                <div class="elegant-card">
+                  <div class="card-header">
+                    <h2><i class="fa-solid fa-user-ninja"></i> Prompt Persona Ren'Py (Hệ thống)</h2>
+                    <div>
+                      <button id="renpy-btn-reset-prompt" class="btn btn-secondary btn-sm"><i class="fa-solid fa-rotate-left"></i> Mặc định</button>
+                    </div>
+                  </div>
+                  <div class="card-desc">
+                    Prompt Persona Hana dành riêng cho tiến trình dịch Ren'Py Visual Novel (hoạt động độc lập hoàn toàn với RPGMaker).
+                  </div>
+                  <textarea id="renpy-prompt-textarea" class="prompt-box compact" rows="10"></textarea>
+                </div>
+
+                <!-- PHẦN 2: PROMPT YÊU CẦU CỦA USER -->
+                <div class="elegant-card">
+                  <div class="card-header">
+                    <h2><i class="fa-solid fa-comment-dots"></i> Prompt Yêu Cầu Của Bạn (<user>)</h2>
+                  </div>
+                  <div class="card-desc">
+                    Nhập các yêu cầu cụ thể dành riêng cho game Ren'Py (ví dụ: <em>"Dịch thoát ý, chú ý xưng hô hiện đại, giữ nguyên tên riêng..."</em>).
+                  </div>
+                  <textarea id="renpy-user-prompt-textarea" class="prompt-box compact" rows="10" placeholder="Nhập yêu cầu dịch thuật cụ thể cho game Ren'Py tại đây..."></textarea>
+                  <div class="form-actions mt-4 text-right">
+                    <button id="renpy-btn-save-prompt" class="btn btn-success"><i class="fa-solid fa-check"></i> Lưu Cấu Hình Prompt Ren'Py</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- PAGE 3: CÀI ĐẶT HỆ THỐNG & AI -->
+      <section id="page-settings" class="page-section">
+        <div class="spacious-container">
+          
+          <!-- THIẾT LẬP PROXY & MODEL -->
+          <div class="settings-group">
+            <div class="group-title"><i class="fa-solid fa-network-wired"></i> Thiết Lập Proxy & Quản Lý Model</div>
+            <div class="elegant-card">
+              <div class="form-row">
+                <div class="form-group col-2">
+                  <label for="api-url">Proxy Base URL</label>
+                  <input type="text" id="api-url" value="https://gcli.ggchan.dev/" placeholder="https://gcli.ggchan.dev/">
+                </div>
+                <div class="form-group col-2">
+                  <label for="api-key">API Key / Password</label>
+                  <input type="password" id="api-key" placeholder="Nhập API Key hoặc Mật khẩu Proxy...">
+                </div>
+              </div>
+
+              <div class="form-actions-row">
+                <button id="btn-connect" class="btn btn-secondary"><i class="fa-solid fa-plug"></i> Kiểm tra kết nối</button>
+                <button id="btn-load-models" class="btn btn-primary"><i class="fa-solid fa-cloud-arrow-down"></i> Load danh sách Model</button>
+              </div>
+
+              <div id="connect-status-banner" class="status-banner">
+                <i class="fa-solid fa-circle-info"></i>
+                <span id="connect-status-text">Hãy nhấn 'Kiểm tra kết nối' hoặc 'Load danh sách Model' để xác thực Proxy.</span>
+              </div>
+
+              <div class="form-row mt-4">
+                <div class="form-group col-full">
+                  <label for="model-select">Chọn Model AI</label>
+                  <select id="model-select" class="select-box">
+                    <option value="gemini-1.5-flash">gemini-1.5-flash (Mặc định)</option>
+                    <option value="gemini-1.5-pro">gemini-1.5-pro</option>
+                    <option value="custom">-- Model tùy chỉnh khác... --</option>
+                  </select>
+                  <input type="text" id="custom-model-input" class="mt-2 hidden" placeholder="Nhập ID model tùy chỉnh của bạn (ví dụ: gemini-2.0-flash)...">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- THIẾT LẬP THÔNG SỐ AI NÂNG CAO -->
+          <div class="settings-group mt-4">
+            <div class="group-title"><i class="fa-solid fa-sliders"></i> Thông Số AI & Tối Ưu Hóa (Advanced Generation Config)</div>
+            <div class="elegant-card">
+              <div class="form-row">
+                <div class="form-group col-2">
+                  <label for="context-window">Context Window (Tokens)</label>
+                  <input type="number" id="context-window" value="2000000" max="2000000">
+                  <small class="field-desc">Giới hạn độ dài bối cảnh (Tối đa: 2,000,000).</small>
+                </div>
+                <div class="form-group col-2">
+                  <label for="max-tokens">Max Response Length (Tokens)</label>
+                  <input type="number" id="max-tokens" value="65536" max="65536">
+                  <small class="field-desc">Giới hạn số token đầu ra (Tối đa: 65,536).</small>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group col-2">
+                  <label for="temperature">Temperature: <span id="temp-val" class="highlight">1.00</span></label>
+                  <input type="range" id="temperature" min="0.0" max="2.0" step="0.05" value="1.00">
+                  <small class="field-desc">Độ sáng tạo của văn bản dịch (Đề xuất: 1.0 - 2.0).</small>
+                </div>
+                <div class="form-group col-2">
+                  <label for="reasoning-effort">Reasoning Effort (Dành cho model tư duy)</label>
+                  <select id="reasoning-effort" class="select-box">
+                    <option value="AUT">AUT (Tự động)</option>
+                    <option value="LOW">LOW (Thấp)</option>
+                    <option value="MED">MED (Trung bình)</option>
+                    <option value="HIGH">HIGH (Cao)</option>
+                  </select>
+                  <small class="field-desc">Tăng cường khả năng suy luận ngữ cảnh trước khi dịch.</small>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group col-2">
+                  <label for="top-k">Top K</label>
+                  <input type="number" id="top-k" value="100">
+                  <small class="field-desc">Giới hạn lựa chọn từ ngữ (Đề xuất: 100 - 500).</small>
+                </div>
+                <div class="form-group col-2">
+                  <label for="top-p">Top P</label>
+                  <input type="number" id="top-p" value="0.95" step="0.01">
+                  <small class="field-desc">Lọc gộp xác suất từ ngữ (Đề xuất: 0.95 - 1.00).</small>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group col-full">
+                  <label class="toggle-label">
+                    <input type="checkbox" id="streaming-toggle" checked>
+                    <span class="toggle-switch"></span>
+                    <span class="toggle-text">Kích hoạt Streaming (Hiển thị văn bản mượt mà theo thời cycle)</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-row mt-4">
+                <button id="btn-save-settings" class="btn btn-success btn-lg"><i class="fa-solid fa-floppy-disk"></i> Lưu Cấu Hình AI</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- TOAST NOTIFICATIONS CONTAINER -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- MODULE SCRIPTS -->
+  <script src="./js/settings.js"></script>
+  <script src="./js/prompt.js"></script>
+  <script src="./js/terminology.js"></script>
+  <script src="./js/renpy.js"></script>
+  <script src="./js/renpy_terminology.js"></script>
+  <script src="./js/api.js"></script>
+  <script src="./js/rpgmaker.js"></script>
+  <script src="./js/app.js"></script>
+</body>
+</html>
