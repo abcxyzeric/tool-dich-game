@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /api/
+Disallow: /doc/*/*
+Allow: /doc/anh/
+Allow: /doc/tac-gia/

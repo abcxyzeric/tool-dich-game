@@ -9,18 +9,7 @@ class NativeBridgeHandler {
                    typeof window.__TAURI__ !== 'undefined' && 
                    !!window.__TAURI__.core;
                    
-    this.isElectron = typeof require !== 'undefined';
-    this.ipcRenderer = null;
-
-    if (this.isElectron) {
-      try {
-        this.ipcRenderer = require('electron').ipcRenderer;
-      } catch (e) {
-        console.warn('Electron ipcRenderer không khả dụng:', e);
-      }
-    }
-
-    console.log(`[NativeBridge] Môi trường hoạt động: ${this.isTauri ? 'Rust (Tauri v2 Native)' : (this.ipcRenderer ? 'Electron' : 'Web Browser')}`);
+    console.log(`[NativeBridge] Môi trường hoạt động: ${this.isTauri ? 'Rust (Tauri v2 Native)' : 'Web Browser'}`);
   }
 
   // Chọn file thông qua hộp thoại OS Native
@@ -40,10 +29,7 @@ class NativeBridgeHandler {
       } catch (err) {
         console.error('[Tauri select_file error]', err);
         return { canceled: true, filePaths: [] };
-      }
-    } else if (this.ipcRenderer) {
-      return await this.ipcRenderer.invoke('select-file', options);
-    }
+      } }
     return { canceled: true, filePaths: [] };
   }
 
@@ -59,10 +45,7 @@ class NativeBridgeHandler {
       } catch (err) {
         console.error('[Tauri select_directory error]', err);
         return { canceled: true, filePaths: [] };
-      }
-    } else if (this.ipcRenderer) {
-      return await this.ipcRenderer.invoke('select-directory');
-    }
+      } }
     return { canceled: true, filePaths: [] };
   }
 
@@ -75,10 +58,7 @@ class NativeBridgeHandler {
       } catch (err) {
         console.error('[Tauri read_dir error]', err);
         return { success: false, error: err.toString() };
-      }
-    } else if (this.ipcRenderer) {
-      return await this.ipcRenderer.invoke('read-dir', dirPath);
-    }
+      } }
     return { success: false, error: 'Không tìm thấy native backend' };
   }
 
@@ -91,10 +71,7 @@ class NativeBridgeHandler {
       } catch (err) {
         console.error('[Tauri read_dir_recursive error]', err);
         return { success: false, error: err.toString() };
-      }
-    } else if (this.ipcRenderer) {
-      return await this.ipcRenderer.invoke('read-dir-recursive', dirPath);
-    }
+      } }
     return { success: false, error: 'Không tìm thấy native backend' };
   }
 
@@ -107,10 +84,7 @@ class NativeBridgeHandler {
       } catch (err) {
         console.error('[Tauri read_file error]', err);
         return { success: false, error: err.toString() };
-      }
-    } else if (this.ipcRenderer) {
-      return await this.ipcRenderer.invoke('read-file', filePath);
-    }
+      } }
     return { success: false, error: 'Không tìm thấy native backend' };
   }
 
@@ -123,10 +97,7 @@ class NativeBridgeHandler {
       } catch (err) {
         console.error('[Tauri write_file error]', err);
         return { success: false, error: err.toString() };
-      }
-    } else if (this.ipcRenderer) {
-      return await this.ipcRenderer.invoke('write-file', filePath, content);
-    }
+      } }
     return { success: false, error: 'Không tìm thấy native backend' };
   }
 
@@ -137,10 +108,7 @@ class NativeBridgeHandler {
         return await window.__TAURI__.core.invoke('check_exists', { targetPath });
       } catch (err) {
         return false;
-      }
-    } else if (this.ipcRenderer) {
-      return await this.ipcRenderer.invoke('check-exists', targetPath);
-    }
+      } }
     return false;
   }
 

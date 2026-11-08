@@ -5,3 +5,5 @@ build/
 .DS_Store
 target/
 src-tauri/target/
+electron_data/
+crawled_vancamuyen/tmp_*

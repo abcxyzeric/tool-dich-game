@@ -1,16 +1,9 @@
-// Cầu nối linh hoạt tương thích cả Rust Native (Tauri v2) và Electron
-const isElectronApp = typeof require !== 'undefined';
-let ipcRenderer = null;
-if (isElectronApp) {
-  try {
-    ipcRenderer = require('electron').ipcRenderer;
-  } catch (e) {}
-}
-if (!ipcRenderer && typeof window !== 'undefined' && window.ipcRenderer) {
-  ipcRenderer = window.ipcRenderer;
-}
+// Kết nối trực tiếp Rust Native Backend (Tauri v2)
+const ipcRenderer = (typeof window !== 'undefined' && window.ipcRenderer) || {
+  async invoke() { return null; }
+};
 
-const path = (isElectronApp && require('path')) || {
+const path = {
   join(...args) {
     return args.map((part, i) => {
       if (typeof part !== 'string') return '';

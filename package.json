@@ -1,20 +1,23 @@
 {
-  "name": "rpgmaker-ai-translator",
+  "name": "ai-game-translator-pro",
   "version": "1.0.0",
-  "description": "Công cụ dịch game RPGMaker và Ren'Py bằng AI thông qua Proxy tùy chỉnh (Phase 1)",
-  "main": "main.js",
+  "description": "Công cụ dịch game RPGMaker và Ren'Py bằng AI thông qua Proxy tùy chỉnh (Rust Tauri Native)",
   "scripts": {
-    "start": "electron ."
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build"
   },
   "keywords": [
     "rpgmaker",
+    "renpy",
     "translation",
     "ai",
-    "electron"
+    "tauri",
+    "rust"
   ],
   "author": "Antigravity",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^30.0.0"
+    "@tauri-apps/cli": "^2.0.0"
   }
 }
