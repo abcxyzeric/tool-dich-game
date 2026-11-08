@@ -1,0 +1,6 @@
+[target.x86_64-pc-windows-gnu]
+linker = "rust-lld.exe"
+rustflags = [
+    "-L", "native=C:/Users/nguye/.rustup/toolchains/stable-x86_64-pc-windows-gnu/lib/rustlib/x86_64-pc-windows-gnu/lib/self-contained",
+    "--cfg", "windows_raw_dylib"
+]

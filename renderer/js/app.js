@@ -1,5 +1,45 @@
-const { ipcRenderer } = require('electron');
-const path = require('path');
+// Cầu nối linh hoạt tương thích cả Rust Native (Tauri v2) và Electron
+const isElectronApp = typeof require !== 'undefined';
+let ipcRenderer = null;
+if (isElectronApp) {
+  try {
+    ipcRenderer = require('electron').ipcRenderer;
+  } catch (e) {}
+}
+if (!ipcRenderer && typeof window !== 'undefined' && window.ipcRenderer) {
+  ipcRenderer = window.ipcRenderer;
+}
+
+const path = (isElectronApp && require('path')) || {
+  join(...args) {
+    return args.map((part, i) => {
+      if (typeof part !== 'string') return '';
+      if (i === 0) return part.trim().replace(/[\/\\]+$/, '');
+      return part.trim().replace(/^[\/\\]+/, '').replace(/[\/\\]+$/, '');
+    }).filter(x => x.length > 0).join('\\');
+  },
+  basename(filePath) {
+    if (!filePath) return '';
+    const norm = filePath.replace(/\\/g, '/');
+    return norm.substring(norm.lastIndexOf('/') + 1);
+  },
+  dirname(filePath) {
+    if (!filePath) return '';
+    const norm = filePath.replace(/\\/g, '/');
+    const idx = norm.lastIndexOf('/');
+    return idx === -1 ? '' : filePath.substring(0, idx);
+  },
+  relative(from, to) {
+    if (!from || !to) return to || '';
+    const normFrom = from.replace(/\\/g, '/').replace(/\/+$/, '');
+    const normTo = to.replace(/\\/g, '/');
+    if (normTo.startsWith(normFrom)) {
+      return normTo.substring(normFrom.length).replace(/^\/+/, '').replace(/\//g, '\\');
+    }
+    return to;
+  }
+};
+
 
 class AppManager {
   constructor() {
