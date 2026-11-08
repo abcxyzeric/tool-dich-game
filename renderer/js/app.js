@@ -1,6 +1,25 @@
-// Kết nối trực tiếp Rust Native Backend (Tauri v2)
+// Kết nối IPC: Hỗ trợ linh hoạt cả Web API Server lẫn Tauri v2 Native
 const ipcRenderer = (typeof window !== 'undefined' && window.ipcRenderer) || {
-  async invoke() { return null; }
+  async invoke(channel, ...args) {
+    if (typeof window !== 'undefined' && window.__TAURI__ && window.__TAURI__.core) {
+      try {
+        return await window.__TAURI__.core.invoke(channel, args[0]);
+      } catch (e) {
+        console.error(`Lỗi Tauri IPC [${channel}]:`, e);
+      }
+    }
+    try {
+      const res = await fetch(`/api/${channel}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(args)
+      });
+      return await res.json();
+    } catch (err) {
+      console.error(`Lỗi API Web IPC [${channel}]:`, err);
+      return { success: false, error: err.message };
+    }
+  }
 };
 
 const path = {

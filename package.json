@@ -3,11 +3,12 @@
   "version": "1.0.0",
   "description": "Công cụ dịch game RPGMaker và Ren'Py bằng AI thông qua Proxy tùy chỉnh (Rust Tauri Native)",
   "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "desktop": "node server.js",
     "tauri": "tauri",
-    "dev": "tauri dev",
-    "start": "tauri dev",
-    "preview": "npx serve renderer",
-    "build": "tauri build"
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build"
   },
   "keywords": [
     "rpgmaker",
