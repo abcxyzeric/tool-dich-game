@@ -257,3 +257,48 @@ Toàn bộ mã nguồn chuyên biệt về dịch game của nền tảng này �
 3. **Khóa Dòng Đã Sửa Tay (Manual Edit Lock)**: Đánh dấu các câu người dùng đã chỉnh sửa thủ công để các đợt dịch tự động tiếp theo không bao giờ ghi đè lên.
 4. **Xuất/Nhập Bảng Dịch CSV cho Excel**: Cho phép xuất ra tệp CSV để người dùng mở bằng Excel soát lỗi, lọc tìm kiếm, sửa hàng loạt rồi nạp ngược lại vào app.
 5. **Bộ Quy Tắc Lọc Sáo Ngữ & Hoàn Nguyên Tên Riêng**: Nâng cấp prompt dịch thuật của app theo chuẩn văn học, loại bỏ lối hành văn AI cứng nhắc và chuyển tên Nhật/Âu Mỹ bị Hán hóa về dạng chuẩn quốc tế.
+
+---
+
+## 12. Phase 9: Tích Hợp Toàn Diện Kiến Trúc Studio & Tính Năng Chuyên Nghiệp Theo Chuẩn Cẩm Uyên (Đã hoàn thiện)
+
+Theo đúng yêu cầu của người dùng, toàn bộ hệ thống đã được tái cấu trúc sang quy chuẩn **Game Studio chuyên nghiệp** (áp dụng tất cả các cải tiến và loại trừ tính năng `previous_tail`).
+
+### 12.1. Kiến Trúc Module Mới (Tuân Thủ Tuyệt Đối Luật No God Files)
+- [`renderer/js/safety_check.js`](file:///f:/tai%20lieu%20hoc%20tap/tooldichgame/renderer/js/safety_check.js):
+  - Tự động bóc tách và đối chiếu toàn vẹn các mã điều khiển của Ren'Py (`[variable]`, `{i}`, `{b}`, `{size}`, `\n`) và RPGMaker (`\V[n]`, `\N[n]`, `\C[n]`, `\!`, `\.`, `\|`, `\{`, `\}`).
+  - Phát hiện các lỗi lệch ngoặc nhọn `{}`, ngoặc vuông `[]` hoặc ký tự xuống dòng vật lý có nguy cơ làm crash game.
+  - Cung cấp hàm `validateAllLines()` và `validateLine()`.
+- [`renderer/js/csv_utils.js`](file:///f:/tai%20lieu%20hoc%20tap/tooldichgame/renderer/js/csv_utils.js):
+  - `generateCSV()`: Xuất toàn bộ bảng dịch hoặc file hiện tại ra tệp CSV có gắn BOM UTF-8 (`\uFEFF`), mở trực tiếp trên Microsoft Excel tiếng Việt không bị lỗi font.
+  - `parseCSV()`: Đọc và phân tích tệp CSV chỉnh sửa từ Excel, nạp ngược lại bản dịch vào đúng từng ID dòng của game.
+- [`renderer/js/studio.js`](file:///f:/tai%20lieu%20hoc%20tap/tooldichgame/renderer/js/studio.js):
+  - Controller điều phối Trung Tâm Dự Án (Project Hub), Bàn Dịch Studio (4 Tab), Bộ Lọc Phân Cảnh (Label / Event), Ước Tính Token nguồn, Khóa sửa tay và Khay AI nổi.
+
+### 12.2. Đổi Mới Toàn Diện Giao Diện UI/UX (Dark Teal Grid & Mint Green)
+1. **Màn hình Project Hub (Dashboard đa dự án)**:
+   - Header với icon Gamepad, nút `+ Dự án Ren'Py (.rpy)` và `+ Dự án RPGMaker (JSON)`.
+   - Hero banner với nền lưới kỹ thuật (Subtle Grid Pattern) và bảng tóm tắt các engine hỗ trợ.
+   - Thẻ dự án dạng Card Grid: Hiển thị tên game, badge engine, thanh tiến độ % xanh mint rực rỡ, số dòng dịch/tổng dòng, ngày cập nhật.
+2. **Không gian làm việc Studio chuẩn 4 Tab**:
+   - `[File & dòng thoại]`: Nơi làm việc chính với thanh tiến độ lô, các nút nghiệp vụ nhanh, bộ lọc đa chiều và bảng dịch 2 cột.
+   - `[Nhân vật (X)]`: Bảng hồ sơ nhân vật, vai trò và quan hệ xưng hô, hiển thị badge số lượng.
+   - `[Thuật ngữ game (Y)]`: Bảng từ điển thuật ngữ game đã chốt, hiển thị badge số lượng.
+   - `[Cài đặt]`: Cấu hình API, Persona và Prompt yêu cầu riêng cho từng dự án.
+3. **Thanh Lọc Đa Chiều & Ước Tính Token Nguồn**:
+   - Tìm kiếm kết hợp theo văn bản, người nói, tên event/label.
+   - Dropdown chọn cụ thể từng Phân Cảnh / Label (`label rep_scene_...`) để dịch riêng phân cảnh đó.
+   - Checkbox "Chọn mọi dòng đã lọc" kèm bộ đếm thời gian thực: `Đã chọn X dòng · Y ký tự · ~ Z token nguồn`.
+   - Dàn nút hành động hàng loạt trên dòng chọn: `[Dịch lại dòng chọn]`, `[Bỏ qua (giữ chữ gốc)]`, `[Đặt lại chưa dịch]`, `[Xoá bản dịch]`.
+4. **Bảng Dịch Thuật Gắn Nhãn Ngữ Cảnh (Contextual Table)**:
+   - Mỗi câu thoại đều có nhãn ngữ cảnh xuất xứ: `Thoại · [speaker] label [label_name]` (Ren'Py) hoặc `Hội thoại · Map [Event ID]` (RPGMaker).
+   - Tích hợp nhãn trạng thái trực quan: `Xong` (xanh mint), `Lỗi` (đỏ kèm tooltip chi tiết), `Đã sửa tay` (tím), `Bỏ qua` (xám).
+5. **Khay Tiến Trình AI Nổi (Floating Drawer)**:
+   - Nằm ở góc dưới màn hình với đèn led xung nhịp (pulse ring).
+   - Hiển thị realtime: `Tiến trình AI: Đang dịch lô X/Y`, đếm ngược thời gian chờ AI, nhật ký log tiến trình. Có thể bấm mở rộng hoặc thu gọn mượt mà.
+
+### 12.3. Các Tính Năng Nghiệp Vụ Đã Lắp Ráp
+- **Kiểm Tra An Toàn (Safety Check)**: Quét toàn bộ dòng dịch bằng nút `[Kiểm tra an toàn]`, hiển thị số lỗi trên thanh tiến độ `Lỗi (X)`, bấm vào lọc ra ngay các dòng lỗi để sửa nhanh.
+- **Khóa Sửa Tay (Manual Edit Lock)**: Bất kỳ câu nào người dùng tự gõ trên textarea được tự động gắn cờ `manualEdited: true`. Tiến trình AI Batch Translation khi chạy sẽ **tuyệt đối không ghi đè** lên những câu này.
+- **Xuất / Nhập CSV (Excel Workflow)**: Cho phép xuất ra tệp CSV để kiểm tra hoặc chia sẻ dịch chung trên Excel, sau đó nạp ngược lại vào tool với 1 cú click chuột.
+- **Ghi Nhận Nhãn Phân Cảnh (Label Tracking)**: Trình bóc tách Ren'Py và RPGMaker tự động nhận diện và lưu trữ `currentLabel` cho từng câu thoại.

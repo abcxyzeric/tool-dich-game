@@ -23,6 +23,8 @@ class RenpyParser {
   parseLines(fileContent, fileName, sidecarData = null) {
     const rawLines = fileContent.split(/\r?\n/);
     const translatableLines = [];
+    let currentLabel = '';
+    const labelPattern = /^\s*label\s+([a-zA-Z0-9_\.]+)\s*:/;
 
     // Regex CHUẨN QUỐC TẾ hỗ trợ BỌC NHÁY NHÂN VẬT ("Driver" "Dialogue") VÀ MENU ("Take shortcut":)
     // Group 1: Khoảng trắng đầu dòng
@@ -40,6 +42,12 @@ class RenpyParser {
       const trimmed = line.trim();
       // Bỏ qua dòng trống và chú thích
       if (trimmed.length === 0 || trimmed.startsWith('#') || trimmed.startsWith('//')) return;
+
+      // Nhận diện phân cảnh label trong Ren'Py
+      const labelMatch = line.match(labelPattern);
+      if (labelMatch) {
+        currentLabel = labelMatch[1];
+      }
 
       const match = line.match(linePattern);
       if (match) {
@@ -85,8 +93,11 @@ class RenpyParser {
 
         translatableLines.push({
           id: lineId,
+          fileName: fileName,
           lineIndex: idx,
-          speaker: displaySpeaker, 
+          speaker: displaySpeaker,
+          label: currentLabel,
+          context: currentLabel ? `label ${currentLabel}` : '',
           prefixSpaces: prefixSpaces,
           speakerBlock: speakerBlock,
           translateMarker: translateMarker,

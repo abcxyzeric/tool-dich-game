@@ -166,6 +166,10 @@ class AppManager {
         } catch (e) { console.error("Lỗi khôi phục file cache RenPy:", e); }
       }
     }
+
+    if (window.studioManager) {
+      window.studioManager.renderProjectHub();
+    }
   }
 
   bindEvents() {
@@ -741,8 +745,8 @@ class AppManager {
       }
       const textToTranslate = ev.original;
       
-      // [RESUME THÔNG MINH] Bỏ qua nếu câu gốc rỗng hoặc CÂU NÀY ĐÃ ĐƯỢC DỊCH
-      if (!textToTranslate.trim() || (ev.translation && ev.translation.trim() !== '')) continue;
+      // [RESUME THÔNG MINH & BẢO VỆ SỬA TAY] Bỏ qua nếu rỗng, đã dịch, đã sửa tay hoặc đã bấm bỏ qua
+      if (!textToTranslate.trim() || (ev.translation && ev.translation.trim() !== '') || ev.manualEdited || ev.isSkipped) continue;
 
       await new Promise((resolve) => {
         window.apiManager.translateStreaming(
@@ -1251,6 +1255,9 @@ class AppManager {
                 return speakerMatch || originalMatch || transMatch || idMatch;
             });
         }
+
+        // BẢO VỆ TUYỆT ĐỐI CÔNG SỨC: Không bao giờ AI tự ý ghi đè lên các câu người dùng đã sửa tay hoặc đã bấm bỏ qua
+        targetEvents = targetEvents.filter(ev => !ev.manualEdited && !ev.isSkipped);
         
         if (targetEvents.length === 0) {
             this.showToast('info', 'Không có dòng nào phù hợp với điều kiện để dịch.', wsId);
@@ -1311,6 +1318,25 @@ class AppManager {
 
       while (retryCount < 3 && !batchSuccess && this.renpyWorkspaces[wsId].isTranslating) {
         this.showToast('info', `[Batch ${currentBatchNum}/${totalBatches}] Đang tiến hành dịch sang tiếng Việt...${retryCount > 0 ? ` (Thử lại lần ${retryCount}/3)` : ''}`, wsId);
+
+        // Cập nhật khay tiến trình AI nổi
+        const drawerTitle = document.getElementById('drawer-title-status');
+        const drawerBatchBadge = document.getElementById('drawer-batch-badge');
+        const drawerFile = document.getElementById('drawer-current-file');
+        const drawerLog = document.getElementById('drawer-log-box');
+        if (drawerTitle) drawerTitle.textContent = `Tiến trình AI: Đang dịch lô ${currentBatchNum}/${totalBatches}`;
+        if (drawerBatchBadge) drawerBatchBadge.textContent = `Lô ${currentBatchNum}/${totalBatches}`;
+        if (drawerFile) drawerFile.textContent = currentFile.fileName;
+        if (drawerLog) {
+          const entry = document.createElement('div');
+          entry.className = 'log-entry';
+          entry.textContent = `[${new Date().toLocaleTimeString()}] Đang dịch lô ${currentBatchNum}/${totalBatches} (${batchEvents.length} dòng)`;
+          drawerLog.appendChild(entry);
+          drawerLog.scrollTop = drawerLog.scrollHeight;
+        }
+        if (window.studioManager) {
+          window.studioManager.updateStudioProgressBar();
+        }
 
         await new Promise((resolve) => {
           window.apiManager.translateBatchRenpy(
