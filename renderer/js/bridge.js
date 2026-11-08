@@ -1,6 +1,5 @@
 // =============================================================================
-// NATIVE BRIDGE: KẾT NỐI GIỮA GIAO DIỆN VÀ RUST NATIVE BACKEND (TAURI V2)
-// Hỗ trợ tự động fallback linh hoạt nếu mở trên môi trường khác
+// NATIVE BRIDGE: KẾT NỐI GIỮA GIAO DIỆN VÀ BACKEND (TAURI V2 HOẶC LOCAL SERVER)
 // =============================================================================
 
 class NativeBridgeHandler {
@@ -9,7 +8,21 @@ class NativeBridgeHandler {
                    typeof window.__TAURI__ !== 'undefined' && 
                    !!window.__TAURI__.core;
                    
-    console.log(`[NativeBridge] Môi trường hoạt động: ${this.isTauri ? 'Rust (Tauri v2 Native)' : 'Web Browser'}`);
+    console.log(`[NativeBridge] Môi trường hoạt động: ${this.isTauri ? 'Rust (Tauri v2 Native)' : 'Local App Server / Web'}`);
+  }
+
+  async callApi(channel, ...args) {
+    try {
+      const res = await fetch(`/api/${channel}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(args)
+      });
+      return await res.json();
+    } catch (e) {
+      console.error(`[Bridge callApi error] ${channel}:`, e);
+      return { success: false, error: e.message };
+    }
   }
 
   // Chọn file thông qua hộp thoại OS Native
@@ -29,8 +42,9 @@ class NativeBridgeHandler {
       } catch (err) {
         console.error('[Tauri select_file error]', err);
         return { canceled: true, filePaths: [] };
-      } }
-    return { canceled: true, filePaths: [] };
+      }
+    }
+    return await this.callApi('select-file', options);
   }
 
   // Chọn thư mục thông qua hộp thoại OS Native
@@ -45,8 +59,9 @@ class NativeBridgeHandler {
       } catch (err) {
         console.error('[Tauri select_directory error]', err);
         return { canceled: true, filePaths: [] };
-      } }
-    return { canceled: true, filePaths: [] };
+      }
+    }
+    return await this.callApi('select-directory');
   }
 
   // Đọc danh sách file trong thư mục (đơn cấp)
@@ -58,8 +73,9 @@ class NativeBridgeHandler {
       } catch (err) {
         console.error('[Tauri read_dir error]', err);
         return { success: false, error: err.toString() };
-      } }
-    return { success: false, error: 'Không tìm thấy native backend' };
+      }
+    }
+    return await this.callApi('read-dir', dirPath);
   }
 
   // Quét danh sách file đệ quy (Recursive) cho dự án Ren'Py (.rpy trong mọi thư mục con)
@@ -71,11 +87,12 @@ class NativeBridgeHandler {
       } catch (err) {
         console.error('[Tauri read_dir_recursive error]', err);
         return { success: false, error: err.toString() };
-      } }
-    return { success: false, error: 'Không tìm thấy native backend' };
+      }
+    }
+    return await this.callApi('read-dir-recursive', dirPath);
   }
 
-  // Đọc nội dung file UTF-8 an toàn bằng Rust
+  // Đọc nội dung file UTF-8 an toàn
   async readFile(filePath) {
     if (this.isTauri) {
       try {
@@ -84,11 +101,12 @@ class NativeBridgeHandler {
       } catch (err) {
         console.error('[Tauri read_file error]', err);
         return { success: false, error: err.toString() };
-      } }
-    return { success: false, error: 'Không tìm thấy native backend' };
+      }
+    }
+    return await this.callApi('read-file', filePath);
   }
 
-  // Ghi nội dung file UTF-8 an toàn bằng Rust
+  // Ghi nội dung file UTF-8 an toàn
   async writeFile(filePath, content) {
     if (this.isTauri) {
       try {
@@ -97,8 +115,9 @@ class NativeBridgeHandler {
       } catch (err) {
         console.error('[Tauri write_file error]', err);
         return { success: false, error: err.toString() };
-      } }
-    return { success: false, error: 'Không tìm thấy native backend' };
+      }
+    }
+    return await this.callApi('write-file', filePath, content);
   }
 
   // Kiểm tra đường dẫn tồn tại
@@ -108,11 +127,12 @@ class NativeBridgeHandler {
         return await window.__TAURI__.core.invoke('check_exists', { targetPath });
       } catch (err) {
         return false;
-      } }
-    return false;
+      }
+    }
+    return await this.callApi('check-exists', targetPath);
   }
 
-  // Cầu nối gửi request tới Proxy AI bằng Rust (Reqwest) - Triệt tiêu lỗi CORS và Timeout
+  // Cầu nối gửi request tới Proxy AI
   async proxyRequest(url, method = 'POST', headers = {}, body = null) {
     if (this.isTauri) {
       try {
@@ -129,14 +149,14 @@ class NativeBridgeHandler {
       }
     }
 
-    // Fallback: Fetch tiêu chuẩn trên trình duyệt / Electron
+    // Fallback: Fetch tiêu chuẩn
     try {
       const fetchOpts = {
         method,
         headers: { ...headers }
       };
       if (body && (method === 'POST' || method === 'PUT')) {
-        fetchOpts.body = JSON.stringify(body);
+        fetchOpts.body = typeof body === 'string' ? body : JSON.stringify(body);
       }
       const res = await fetch(url, fetchOpts);
       const text = await res.text();
@@ -176,4 +196,3 @@ window.ipcRenderer = {
     }
   }
 };
-

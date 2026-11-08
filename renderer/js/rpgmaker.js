@@ -33,10 +33,7 @@ class RPGMakerParser {
           const originalText = lines.join('\n');
           translatableEvents.push({
             id: `Actor_${actor.id}`,
-            fileName: fileName,
             code: 'Actor',
-            label: `Actor ${actor.id} (${actor.name || ''})`,
-            context: `Actor ${actor.id}`,
             original: originalText,
             translation: "", // ĐẢM BẢO TRỐNG KHI MỚI IMPORT
             commands: commands
@@ -75,10 +72,7 @@ class RPGMakerParser {
           const originalText = lines.join('\n');
           translatableEvents.push({
             id: `Event_${event.id}`,
-            fileName: fileName,
             code: `Event ${event.id} (${event.name || ''})`,
-            label: `${fileName.replace('.json', '')} [Event ${event.id} - ${event.name || 'Không tên'}]`,
-            context: `Event ${event.id}`,
             original: originalText,
             translation: "", // ĐẢM BẢO TRỐNG KHI MỚI IMPORT
             commands: commands
@@ -112,10 +106,7 @@ class RPGMakerParser {
           const originalText = lines.join('\n');
           translatableEvents.push({
             id: `CommonEvent_${event.id}`,
-            fileName: fileName,
             code: `Common Event ${event.id} (${event.name || ''})`,
-            label: `Common Event ${event.id} (${event.name || 'Không tên'})`,
-            context: `CommonEvent ${event.id}`,
             original: originalText,
             translation: "", // ĐẢM BẢO TRỐNG KHI MỚI IMPORT
             commands: commands
@@ -145,10 +136,7 @@ class RPGMakerParser {
           const originalText = lines.join('\n');
           translatableEvents.push({
             id: `Item_${item.id}`,
-            fileName: fileName,
             code: `Item ${item.id}`,
-            label: `${fileName.replace('.json', '')} [Item ${item.id} - ${item.name || ''}]`,
-            context: `Item ${item.id}`,
             original: originalText,
             translation: "", // ĐẢM BẢO TRỐNG KHI MỚI IMPORT
             commands: commands
