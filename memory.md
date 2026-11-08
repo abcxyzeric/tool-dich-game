@@ -228,3 +228,32 @@ Trong giai đoạn này, dự án bước vào cuộc cách mạng kiến trúc 
   - Trích xuất thông tin nhân vật và phân tách tên thuần túy.
   - Quản lý Batch Translation, nút dừng dịch khẩn cấp, lưu cấu hình và khôi phục Workspace State bền vững.
 - Đồng bộ và đẩy toàn bộ mã nguồn lên Git Repository tại: `https://github.com/abcxyzeric/tool-dich-game.git`.
+
+---
+
+## 11. Phase 8: Loại Bỏ Hoàn Toàn Electron & Khảo Sát Tinh Hoa Dịch Thuật Từ Vân Thư Cẩm Uyên
+
+### 11.1. Khử Hoàn Toàn Electron Khỏi Toàn Bộ Dự Án
+- **Thanh lọc tệp tin**: Xóa bỏ vĩnh viễn `main.js`, thư mục lưu trữ cache `electron_data/`, và gỡ bỏ 69 package của `electron` khỏi `node_modules`.
+- **Chuyển dịch 100% sang Tauri v2**:
+  - Tái cấu trúc `package.json` với script chính thức của Tauri (`npm run dev` -> `tauri dev`, `npm run build` -> `tauri build`).
+  - Cài đặt gói chính thức `@tauri-apps/cli` v2.12.4.
+  - Cập nhật [`renderer/js/bridge.js`](file:///f:/tai%20lieu%20hoc%20tap/tooldichgame/renderer/js/bridge.js) và [`renderer/js/app.js`](file:///f:/tai%20lieu%20hoc%20tap/tooldichgame/renderer/js/app.js) thành kết nối Rust Native 100%, không còn phụ thuộc hay fallback về Electron.
+- **Tự động hóa biên dịch đám mây (GitHub Actions CI/CD)**:
+  - Thiết lập [`.github/workflows/build.yml`](file:///f:/tai%20lieu%20hoc%20tap/tooldichgame/.github/workflows/build.yml) chạy trên môi trường `windows-latest`.
+  - Tự động biên dịch mã Rust, liên kết MSVC và đóng gói phát hành file `.exe` siêu nhẹ (~10MB) vào mục Releases trên GitHub mỗi khi push code lên nhánh `main`.
+
+### 11.2. Crawl & Giải Mã Mã Nguồn Dịch Game Của Vân Thư Cẩm Uyên (`vancamuyen.online`)
+Toàn bộ mã nguồn chuyên biệt về dịch game của nền tảng này đã được crawl và giải mã (deobfuscate) lưu tại thư mục [`crawled_vancamuyen/`](file:///f:/tai%20lieu%20hoc%20tap/tooldichgame/crawled_vancamuyen/):
+- `GameStudioPage-BAlfuGG_.js`: Module "Việt hoá game" (`/viet-hoa-game`), hỗ trợ RPG Maker MV/MZ/XP/VX/Ace, Ren'Py (`game/tl/vietnamese`), Wolf RPG, Unity XUnity AutoTranslator.
+- `translateQueue-4M3VbCOW.js`: Cơ chế hàng đợi dịch batch, quản lý ngữ cảnh nối cảnh (`previous_tail`) và bộ nhớ diễn biến đã qua (`story_memory`).
+- `translationPrompts-B_R86Q2a.js`: Kho chỉ đạo văn học dịch thuật (`<translation_contract>`), quy tắc chuyển tự tên riêng (Hán-Việt vs Romaji gốc), bóc tách thuật ngữ chuyên sâu.
+- `novelAppViLint-CId_mdLu.js`: Bộ linter kiểm tra văn phong tiếng Việt (ViLint), phát hiện sáo ngữ, câu văn mẫu AI, điệp chủ ngữ.
+- `EntityWorkbench-DRUKnvyy.js` & `GlossaryPanel-f0Tinh0B.js`: Hệ thống quản lý hồ sơ nhân vật và thuật ngữ.
+
+### 11.3. Các Tính Năng Giá Trị Đề Xuất Lắp Ráp Vào Dự Án
+1. **Kiểm Tra An Toàn Trước Khi Xuất (Pre-Export Safety Check)**: Quét tự động các dòng dịch có nguy cơ làm hỏng mã điều khiển của game (`\V[n]`, `\C[n]`, `[variable]`, `{i}`, `\n`), cảnh báo trước khi xuất file để tránh làm sập game.
+2. **Cơ Chế Nối Mạch Ngữ Cảnh Bằng `previous_tail`**: Tiêm 2-3 câu cuối của batch trước vào prompt của batch sau để AI giữ nguyên giọng điệu và cách xưng hô xuyên suốt cả cảnh thoại.
+3. **Khóa Dòng Đã Sửa Tay (Manual Edit Lock)**: Đánh dấu các câu người dùng đã chỉnh sửa thủ công để các đợt dịch tự động tiếp theo không bao giờ ghi đè lên.
+4. **Xuất/Nhập Bảng Dịch CSV cho Excel**: Cho phép xuất ra tệp CSV để người dùng mở bằng Excel soát lỗi, lọc tìm kiếm, sửa hàng loạt rồi nạp ngược lại vào app.
+5. **Bộ Quy Tắc Lọc Sáo Ngữ & Hoàn Nguyên Tên Riêng**: Nâng cấp prompt dịch thuật của app theo chuẩn văn học, loại bỏ lối hành văn AI cứng nhắc và chuyển tên Nhật/Âu Mỹ bị Hán hóa về dạng chuẩn quốc tế.
