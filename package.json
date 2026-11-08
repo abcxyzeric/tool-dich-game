@@ -5,6 +5,8 @@
   "scripts": {
     "tauri": "tauri",
     "dev": "tauri dev",
+    "start": "tauri dev",
+    "preview": "npx serve renderer",
     "build": "tauri build"
   },
   "keywords": [
